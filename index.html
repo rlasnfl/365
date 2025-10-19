@@ -1,14 +1,24 @@
 import tkinter as tk
 from datetime import datetime, timedelta
+from tkinter import messagebox
 
-# 공부 기록 저장용
+# -------------------------------
+# 전역 변수
+# -------------------------------
 study_start = None
 total_study_time = timedelta(0)
+goal_time = timedelta(hours=2)  # 목표 공부 시간 2시간
 
+# -------------------------------
+# 함수 정의
+# -------------------------------
 def start_study():
     global study_start
-    study_start = datetime.now()
-    status_label.config(text="공부 시작!")
+    if study_start is None:
+        study_start = datetime.now()
+        status_label.config(text="공부 시작!")
+    else:
+        messagebox.showinfo("알림", "이미 공부 중입니다!")
 
 def end_study():
     global study_start, total_study_time
@@ -16,21 +26,41 @@ def end_study():
         elapsed = datetime.now() - study_start
         total_study_time += elapsed
         study_start = None
-        status_label.config(text=f"공부 종료! 총 공부 시간: {total_study_time}")
+        status_label.config(text=f"공부 종료! 총 공부 시간: {str(total_study_time).split('.')[0]}")
+        check_goal()
     else:
-        status_label.config(text="공부를 먼저 시작하세요!")
+        messagebox.showinfo("알림", "공부를 먼저 시작하세요!")
 
+def check_goal():
+    if total_study_time >= goal_time:
+        messagebox.showinfo("축하!", "오늘 목표 공부 시간 달성! 🎉")
+
+def reset_time():
+    global study_start, total_study_time
+    study_start = None
+    total_study_time = timedelta(0)
+    status_label.config(text="공부 시간 초기화됨")
+    messagebox.showinfo("알림", "총 공부 시간이 초기화되었습니다.")
+
+# -------------------------------
 # GUI 설정
+# -------------------------------
 root = tk.Tk()
 root.title("공부 시간 관리 앱")
-root.geometry("350x200")
+root.geometry("400x250")
+root.resizable(False, False)
 
-start_btn = tk.Button(root, text="공부 시작", command=start_study, width=15, height=2)
+# 버튼
+start_btn = tk.Button(root, text="공부 시작", command=start_study, width=20, height=2, bg="#4CAF50", fg="white")
 start_btn.pack(pady=10)
 
-end_btn = tk.Button(root, text="공부 종료", command=end_study, width=15, height=2)
+end_btn = tk.Button(root, text="공부 종료", command=end_study, width=20, height=2, bg="#f44336", fg="white")
 end_btn.pack(pady=10)
 
+reset_btn = tk.Button(root, text="시간 초기화", command=reset_time, width=20, height=2, bg="#2196F3", fg="white")
+reset_btn.pack(pady=10)
+
+# 상태 표시
 status_label = tk.Label(root, text="앱을 시작하세요!", font=("Arial", 12))
 status_label.pack(pady=20)
 
